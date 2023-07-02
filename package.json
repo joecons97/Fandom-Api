@@ -1,6 +1,6 @@
 {
     "name": "com.josephus.fandomapi",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "A package that allows for easy interfacing with the Fandom API via code",
     "displayName": "Fandom Api",
     "author": {
