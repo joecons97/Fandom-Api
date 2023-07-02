@@ -1,0 +1,16 @@
+{
+    "name": "com.josephus.fandomapi.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:5d40da54533dcdc4a94fee9086562c57"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
