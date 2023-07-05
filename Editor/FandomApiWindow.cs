@@ -5,12 +5,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
-using Unity.VisualScripting;
 using UnityEditor;
 using UnityEditor.PackageManager.UI;
 using UnityEngine;
-using static Codice.CM.WorkspaceServer.WorkspaceTreeDataStore;
 
 public class FandomApiWindow : EditorWindow
 {
@@ -21,6 +20,7 @@ public class FandomApiWindow : EditorWindow
     Type[] _services;
     IFandomService _activeService;
     bool _isRunningTask = false;
+    Exception _exception;
 
     [MenuItem("Window/Fandom/Api Window")]
     static void Init()
@@ -78,9 +78,16 @@ public class FandomApiWindow : EditorWindow
 
     async Task LoadServices()
     {
-        _services = Assembly.GetAssembly(typeof(IFandomService)).GetTypes().
+        Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
+        List<Type> types = new List<Type>();
+        foreach (Assembly assembly in assemblies)
+        {
+            types.AddRange(assembly.GetTypes().
             Where(x => !x.IsInterface && (x.GetInterfaces().Contains(typeof(IFandomService)) ||
-            x.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IFandomService<>)))).ToArray();
+            x.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IFandomService<>)))));
+        }
+
+        _services = types.ToArray();
     }
 
     void OnFocus()
@@ -203,15 +210,25 @@ public class FandomApiWindow : EditorWindow
         if (GUILayout.Button(text))
         {
             response.SetValue(_activeService, null);
-            Task.Run(async () =>
+            Task.Factory.StartNew(async () =>
             {
                 _isRunningTask = true;
-                await _activeService.Execute(_apiClient);
-            })
-            .ContinueWith(t =>
-            {
-                _isRunningTask = false;
-            });
+                try
+                {
+                    await _activeService.Execute(_apiClient);
+                }
+                catch(Exception ex)
+                {
+                    _exception = ex;
+                }
+                finally
+                {
+                    _isRunningTask = false;
+                }
+            },
+            CancellationToken.None,
+            TaskCreationOptions.None,
+            TaskScheduler.FromCurrentSynchronizationContext());
         }
 
         GUI.enabled = true;
@@ -229,6 +246,11 @@ public class FandomApiWindow : EditorWindow
             });
 
             EditorGUILayout.HelpBox(responseText, MessageType.Info);
+        }
+
+        if(_exception != null)
+        {
+            EditorGUILayout.HelpBox(_exception.ToString(), MessageType.Error);
         }
     }
 

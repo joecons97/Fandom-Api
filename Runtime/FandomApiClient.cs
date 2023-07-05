@@ -129,6 +129,38 @@ namespace FandomApi
             return token;
         }
 
+        public async Task<bool> UploadFileAsync(UploadFileDto dto)
+        {
+            using var content = new MultipartFormDataContent()
+            {
+                { new StreamContent(dto.File), "file", dto.FileName},
+                { new StringContent(dto.Action), "action" },
+                { new StringContent(dto.Format), "format" },
+                { new StringContent(dto.bot.ToString()), "bot" },
+                { new StringContent(dto.IgnoreWarnings.ToString()), "ignorewarnings" },
+                { new StringContent(dto.FileName), "filename" },
+                { new StringContent(dto.Token), "token" },
+            };
+
+            var response = await _httpClient.PostAsync(GetApiPath(), content);
+            response.EnsureSuccessStatusCode();
+
+            var responseBody = await response.Content.ReadAsStringAsync();
+            var json = JObject.Parse(responseBody);
+
+            try
+            {
+                if (json["upload"]["result"].ToObject<string>() != "Success")
+                    return false;
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         public async Task<bool> EditAsync(EditDto dto)
         {
             var content = new FormUrlEncodedContent(dto.ToKeyValue());
@@ -138,10 +170,17 @@ namespace FandomApi
             var responseBody = await response.Content.ReadAsStringAsync();
             var json = JObject.Parse(responseBody);
 
-            if (json["edit"]["result"].ToObject<string>() != "Success")
-                return false;
+            try
+            {
+                if (json["edit"]["result"].ToObject<string>() != "Success")
+                    return false;
 
-            return true;
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         public async Task<UserInfo> GetUserInfoAsync()
