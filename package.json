@@ -1,9 +1,9 @@
 {
-    "name": "com.josephus.fandomapi",
-    "version": "1.1.0",
-    "description": "A package that allows for easy interfacing with the Fandom API via code",
-    "displayName": "Fandom Api",
-    "author": {
-        "name": "Joe Constable"
-    }
+  "name": "com.josephus.fandomapi",
+  "version": "1.1.1",
+  "description": "A package that allows for easy interfacing with the Fandom API via code",
+  "displayName": "Fandom Api",
+  "author": {
+    "name": "Joe Constable"
+  }
 }

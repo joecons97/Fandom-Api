@@ -8,7 +8,6 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEditor;
-using UnityEditor.PackageManager.UI;
 using UnityEngine;
 
 public class FandomApiWindow : EditorWindow
